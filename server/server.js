@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import userRoutes from "./routes/userRoutes.js";
+import organiserRoutes from "./routes/organiserRoutes.js";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.get("/",(req,res)=>{
 });
 
 app.use("/api/users",userRoutes);
+app.use("/api/organiser", organiserRoutes);
 
 const PORT = process.env.PORT || 4000;
 

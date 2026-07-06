@@ -1,15 +1,21 @@
 import pool from "../config/db.js";
 
 export const findUserByEmail = async (email) => {
+
     const result = await pool.query(
-        "SELECT * FROM users WHERE email = $1",
+        "SELECT * FROM users WHERE email=$1",
         [email]
     );
 
     return result.rows[0];
 };
 
-export const createUser = async (full_name, email, phone, password) => {
+export const createUser = async (
+    full_name,
+    email,
+    phone,
+    password
+) => {
 
     const result = await pool.query(
 
@@ -20,7 +26,12 @@ export const createUser = async (full_name, email, phone, password) => {
 
         RETURNING *`,
 
-        [full_name, email, phone, password]
+        [
+            full_name,
+            email,
+            phone,
+            password
+        ]
 
     );
 

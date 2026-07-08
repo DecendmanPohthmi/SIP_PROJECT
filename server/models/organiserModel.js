@@ -39,3 +39,93 @@ export const createOrganiser = async (
     return result.rows[0];
 
 };
+
+export const pendingOrganiser = async () => {
+    const result = await pool.query(
+        `SELECT
+            organiser_id,
+            full_name,
+            organisation_name,
+            email,
+            phone,
+            status,
+            created_at
+
+         FROM organisers
+
+         WHERE status='pending'
+
+         ORDER BY created_at ASC`
+    );
+
+    return result.rows;
+};
+
+export const findOrganiserById = async (organiser_id) => {
+    const result = await pool.query(
+        `SELECT
+            organiser_id,
+            full_name,
+            organisation_name,
+            email,
+            phone,
+            status,
+            rejection_reason,
+            created_at
+
+         FROM organisers
+
+         WHERE organiser_id=$1`,
+        [organiser_id]
+    );
+
+    return result.rows[0];
+};
+
+export const approveOrganiser = async (organiser_id) => {
+    const result = await pool.query(
+        `UPDATE organisers
+
+         SET
+         status='approved',
+         updated_at=CURRENT_TIMESTAMP
+
+         WHERE organiser_id=$1
+
+         RETURNING organiser_id, full_name, organisation_name, email, status`,
+        [organiser_id]
+    );
+
+    return result.rows[0];
+};
+
+export const rejectOrganiser = async (organiser_id, reason) => {
+    const result = await pool.query(
+        `UPDATE organisers
+
+         SET
+         status='rejected',
+         rejection_reason=$1,
+         updated_at=CURRENT_TIMESTAMP
+
+         WHERE organiser_id=$2
+
+         RETURNING organiser_id, full_name, organisation_name, email, status, rejection_reason`,
+        [reason, organiser_id]
+    );
+
+    return result.rows[0];
+};
+
+export const deleteOrganiser = async (organiser_id) => {
+    const result = await pool.query(
+        `DELETE FROM organisers
+
+         WHERE organiser_id=$1
+
+         RETURNING organiser_id`,
+        [organiser_id]
+    );
+
+    return result.rows[0];
+};

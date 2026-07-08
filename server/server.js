@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 
 import userRoutes from "./routes/userRoutes.js";
 import organiserRoutes from "./routes/organiserRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import eventRoutes from "./routes/eventRoutes.js";
+
 
 dotenv.config();
 
@@ -19,8 +22,10 @@ app.get("/",(req,res)=>{
 
 });
 
-app.use("/api/users",userRoutes);
+app.use("/api/user",userRoutes);
 app.use("/api/organiser", organiserRoutes);
+app.use("/api/admin",adminRoutes);
+app.use("/api/events", eventRoutes);
 
 const PORT = process.env.PORT || 4000;
 

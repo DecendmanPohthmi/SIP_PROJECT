@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import {
   BsTicketPerforated,
-  BsTicketDetailed,
   BsSearch,
   BsGrid,
   BsPerson,
@@ -26,17 +25,16 @@ const Navbar = () => {
       {/* Navigation Links */}
       <ul className="hidden md:flex items-center gap-6 text-[#49557E] text-lg">
         <li>
-          <Link to="/" className="hover:border-b-2 hover:border-[#49557E]">
-            <BsHouseDoor size={28} />
+          <Link to="/">
+            <BsHouseDoor size={26} className="text-[#49557E] cursor-pointer hover:text-[#FF4C24] transition-colors" />
           </Link>
         </li>
 
         <li>
           <Link
             to="/dashboard"
-            className="hover:border-b-2 hover:border-[#49557E]"
           >
-            <BsGrid size={28} />
+            <BsGrid size={26} className="text-[#49557E] cursor-pointer hover:text-[#FF4C24] transition-colors" />
           </Link>
         </li>
       </ul>

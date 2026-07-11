@@ -9,10 +9,12 @@ import {
   BsCalendarCheck,
   BsBagCheck,
 } from "react-icons/bs";
+import { useAuth } from "../context/AuthContext";
 
 const ProfilePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const isActive = (path: string) => location.pathname === path;
 
   const menuItems = [
@@ -21,9 +23,8 @@ const ProfilePage = () => {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    navigate("/");
+    logout();
+    navigate("/", { replace: true });
   };
 
   return (

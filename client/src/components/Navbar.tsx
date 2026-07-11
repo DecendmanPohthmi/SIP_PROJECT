@@ -6,37 +6,48 @@ import {
   BsPerson,
   BsHouseDoor,
 } from "react-icons/bs";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
-  const token = localStorage.getItem("token");
+  const { token, role } = useAuth();
   const isLoggedIn = !!token;
+
+  const dashboardPath = role === "organiser" ? "/organiser/dashboard" : "/dashboard";
+  const homePath = role === "organiser" ? "/" : "/";
 
   return (
     <nav className="max-w-7xl mx-auto mt-8 px-7 py-5 flex justify-between items-center bg-white shadow-lg rounded-2xl border border-slate-100">
       {/* Logo */}
       <Link
-        to="/"
+        to={homePath}
         className="flex items-center gap-2 w-[150px] text-2xl font-bold text-[#49557E]"
       >
         <BsTicketPerforated size={28} />
         <span>EventNest</span>
       </Link>
 
-      {/* Navigation Links */}
-      <ul className="hidden md:flex items-center gap-6 text-[#49557E] text-lg">
+      <ul className="hidden md:flex items-center gap-6 text-[#49557E]">
         <li>
-          <Link to="/">
-            <BsHouseDoor size={26} className="text-[#49557E] cursor-pointer hover:text-[#FF4C24] transition-colors" />
+          <Link
+            to={homePath}
+            className="flex items-center gap-2 hover:text-[#FF4C24] transition-colors"
+          >
+            <BsHouseDoor size={20} />
+            <span>Home</span>
           </Link>
         </li>
 
-        <li>
-          <Link
-            to="/dashboard"
-          >
-            <BsGrid size={26} className="text-[#49557E] cursor-pointer hover:text-[#FF4C24] transition-colors" />
-          </Link>
-        </li>
+        {isLoggedIn && (
+          <li>
+            <Link
+              to={dashboardPath}
+              className="flex items-center gap-2 hover:text-[#FF4C24] transition-colors"
+            >
+              <BsGrid size={20} />
+              <span>Dashboard</span>
+            </Link>
+          </li>
+        )}
       </ul>
 
       {/* Right Side */}
@@ -68,7 +79,10 @@ const Navbar = () => {
         {/* Profile — only show when logged in */}
         {isLoggedIn && (
           <Link to="/profile">
-            <BsPerson size={26} className="text-[#49557E] cursor-pointer hover:text-[#FF4C24] transition-colors" />
+            <BsPerson
+              size={26}
+              className="text-[#49557E] cursor-pointer hover:text-[#FF4C24] transition-colors"
+            />
           </Link>
         )}
       </div>

@@ -52,7 +52,8 @@ const Register = () => {
         throw new Error(data.message || "Registration failed");
       }
 
-      navigate("/verify-otp", { state: { email, role } });
+      const storedRole = role === "attendee" ? "user" : "organiser";
+      navigate("/verify", { state: { email, role: storedRole } });
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -72,7 +73,6 @@ const Register = () => {
           Join EventHub today
         </p>
 
-        {/* Register As */}
         <label className="block font-semibold mb-2">
           Register As
         </label>
@@ -103,7 +103,6 @@ const Register = () => {
           </button>
         </div>
 
-        {/* Full Name */}
         <label className="block font-semibold mb-2">
           Full Name
         </label>
@@ -116,7 +115,6 @@ const Register = () => {
           className="w-full border border-gray-300 rounded-lg p-3 mb-4"
         />
 
-        {/* Organisation Name — only for organizer */}
         {role === "organizer" && (
           <>
             <label className="block font-semibold mb-2">
@@ -133,7 +131,6 @@ const Register = () => {
           </>
         )}
 
-        {/* Email */}
         <label className="block font-semibold mb-2">
           Email
         </label>
@@ -146,7 +143,6 @@ const Register = () => {
           className="w-full border border-gray-300 rounded-lg p-3 mb-4"
         />
 
-        {/* Phone */}
         <label className="block font-semibold mb-2">
           Phone Number
         </label>
@@ -159,7 +155,6 @@ const Register = () => {
           className="w-full border border-gray-300 rounded-lg p-3 mb-4"
         />
 
-        {/* Password */}
         <label className="block font-semibold mb-2">
           Password
         </label>
@@ -172,7 +167,6 @@ const Register = () => {
           className="w-full border border-gray-300 rounded-lg p-3 mb-4"
         />
 
-        {/* Confirm Password */}
         <label className="block font-semibold mb-2">
           Confirm Password
         </label>
@@ -193,7 +187,6 @@ const Register = () => {
           <p className="text-red-500 text-sm mb-4">{error}</p>
         )}
 
-        {/* Sign Up Button */}
         <button
           onClick={handleRegister}
           disabled={loading}

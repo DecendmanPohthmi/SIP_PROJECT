@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [role, setRole] = useState<"attendee" | "organizer">("attendee");
   const [email, setEmail] = useState("");
@@ -38,10 +40,10 @@ const Login = () => {
         throw new Error(data.message || "Login failed");
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", role === "attendee" ? "user" : "organiser");
+      const storedRole = role === "attendee" ? "user" : "organiser";
+      login(data.token, storedRole);
 
-      navigate(role === "attendee" ? "/" : "/dashboard");
+      navigate(storedRole === "user" ? "/" : "/");
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -61,7 +63,6 @@ const Login = () => {
           Login to your EventHub account
         </p>
 
-        {/* Login As */}
         <label className="block font-semibold mb-2">
           Login As
         </label>
@@ -92,7 +93,6 @@ const Login = () => {
           </button>
         </div>
 
-        {/* Email */}
         <label className="block font-semibold mb-2">
           Email
         </label>
@@ -105,7 +105,6 @@ const Login = () => {
           className="w-full border border-gray-300 rounded-lg p-3 mb-4"
         />
 
-        {/* Password */}
         <label className="block font-semibold mb-2">
           Password
         </label>
@@ -122,7 +121,6 @@ const Login = () => {
           <p className="text-red-500 text-sm mb-4">{error}</p>
         )}
 
-        {/* Login Button */}
         <button
           onClick={handleLogin}
           disabled={loading}

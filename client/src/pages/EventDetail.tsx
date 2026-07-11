@@ -15,6 +15,7 @@ type EventType = {
   pricing_mode?: string;
   available_capacity?: number;
   total_capacity?: number;
+  image_url?: string;
 };
 
 const EventDetail = () => {
@@ -87,7 +88,7 @@ const EventDetail = () => {
 
       {/* Event Image */}
       <img
-        src={event.image || "https://images.unsplash.com/photo-1511578314322-379afb476865?w=1200"}
+        src={event.image_url}
         alt={event.title}
         className="w-full h-96 object-cover"
       />

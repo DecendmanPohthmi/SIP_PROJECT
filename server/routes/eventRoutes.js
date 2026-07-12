@@ -1,56 +1,49 @@
 import express from "express";
-
 import authMiddleware from "../middleware/auth.js";
+import requireRole from "../middleware/requireRole.js";
+import upload from "../middleware/upload.js";
 
 import {
   addEvent,
   fetchAllEvents,
-  fetchApprovedEvents,
-  fetchPendingEvents,
+  fetchEventsByStatus,
+  searchEvents,
   fetchEvent,
   fetchMyEvents,
+  fetchMyEventsByStatus,
   editEvent,
   approveEventByAdmin,
   rejectEventByAdmin,
+  goLive,
+  cancelEventByOrganiser,
+  completeEventByAdmin,
   removeEvent,
+  fetchLivedEvents,
 } from "../controllers/eventController.js";
 
 const router = express.Router();
 
 // ================= ORGANISER =================
-
-// Create Event
-router.post("/create", authMiddleware, addEvent);
-
-// Get Logged-in Organiser's Events
+router.post("/create", authMiddleware, upload.single("image"), addEvent);
 router.get("/my-events", authMiddleware, fetchMyEvents);
-
-// Update Event
-router.put("/update/:id", authMiddleware, editEvent);
-
-// Delete Event
+router.get("/my-events/status/:status", authMiddleware, fetchMyEventsByStatus);
+router.put("/update/:id", authMiddleware, upload.single("image"), editEvent);
+router.put("/publish/:id", authMiddleware, goLive);
+router.put("/cancel/:id", authMiddleware, cancelEventByOrganiser);
 router.delete("/delete/:id", authMiddleware, removeEvent);
 
 // ================= PUBLIC =================
-
-// Get All Events
 router.get("/", fetchAllEvents);
+router.get("/approved", fetchLivedEvents); // live events, attendee-facing
 
-// Get Approved Events Only
-router.get("/approved", fetchApprovedEvents);
+// ================= ADMIN (must be before /:id) =================
+router.get("/status/:status", authMiddleware, requireRole("admin"), fetchEventsByStatus);
+router.get("/search", authMiddleware, requireRole("admin"), searchEvents);
+router.put("/approve/:id", authMiddleware, requireRole("admin"), approveEventByAdmin);
+router.put("/reject/:id", authMiddleware, requireRole("admin"), rejectEventByAdmin);
+router.put("/complete/:id", authMiddleware, requireRole("admin"), completeEventByAdmin);
 
-// Get Single Event
+// ================= WILDCARD — MUST STAY LAST =================
 router.get("/:id", fetchEvent);
-
-// ================= ADMIN =================
-
-// Get Pending Events
-router.get("/pending", authMiddleware, fetchPendingEvents);
-
-// Approve Event
-router.put("/approve/:id", authMiddleware, approveEventByAdmin);
-
-// Reject Event
-router.put("/reject/:id", authMiddleware, rejectEventByAdmin);
 
 export default router;

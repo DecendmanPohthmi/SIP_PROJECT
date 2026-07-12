@@ -82,6 +82,27 @@ export const findOrganiserById = async (organiser_id) => {
     return result.rows[0];
 };
 
+export const ApprovedOrganiser = async () => {
+    const result = await pool.query(
+        `SELECT
+            organiser_id,
+            full_name,
+            organisation_name,
+            email,
+            phone,
+            status,
+            created_at
+
+         FROM organisers
+
+         WHERE status='approved'
+
+         ORDER BY created_at ASC`
+    );
+
+    return result.rows;
+};
+
 export const approveOrganiser = async (organiser_id) => {
     const result = await pool.query(
         `UPDATE organisers
@@ -97,6 +118,27 @@ export const approveOrganiser = async (organiser_id) => {
     );
 
     return result.rows[0];
+};
+
+export const RejectedOrganiser = async () => {
+    const result = await pool.query(
+        `SELECT
+            organiser_id,
+            full_name,
+            organisation_name,
+            email,
+            phone,
+            status,
+            created_at
+
+         FROM organisers
+
+         WHERE status='rejected'
+
+         ORDER BY created_at ASC`
+    );
+
+    return result.rows;
 };
 
 export const rejectOrganiser = async (organiser_id, reason) => {

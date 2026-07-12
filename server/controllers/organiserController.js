@@ -3,14 +3,18 @@ import jwt from "jsonwebtoken";
 import otpGenerator from "otp-generator";
 
 import otpStore from "../otpStore.js";
-import { sendOTP } from "../utils/sendEmail.js";
+import { sendOTP ,notifyAdminNewOrganiser, notifyOrganiserDeleted} from "../utils/sendEmail.js";
 
 import {
   createOrganiser,
   findOrganiserByEmail,
+  findOrganiserById,
   pendingOrganiser as getPendingOrganisers,
+  ApprovedOrganiser as getApprovedORganisers,
+  RejectedOrganiser as getRejectedOrganisers,
   approveOrganiser,
   rejectOrganiser,
+  deleteOrganiser,
 } from "../models/organiserModel.js";
 
 import { isValidEmail, isStrongPassword } from "../utils/validators.js";
@@ -133,14 +137,12 @@ export const verifyOTP = async (req, res) => {
     }
 
     if (Date.now() > organiserData.expiresAt) {
-
       delete otpStore[email];
 
       return res.status(400).json({
         success: false,
         message: "OTP has expired.",
       });
-
     }
 
     if (organiserData.otp !== otp) {
@@ -168,6 +170,13 @@ export const verifyOTP = async (req, res) => {
     const token = generateToken(organiser);
 
     delete organiser.password;
+
+    // Notify admin — don't let this block or fail the registration response
+    try {
+      await notifyAdminNewOrganiser(organiser);
+    } catch (notifyError) {
+      console.error("Failed to notify admin:", notifyError);
+    }
 
     return res.status(201).json({
       success: true,
@@ -286,6 +295,56 @@ export const fetchPendingOrganisers = async (req, res) => {
   }
 };
 
+// ================= GET Approved ORGANISERS (ADMIN) =================
+
+export const fetchApprovedOrganisers = async (req, res) => {
+  try {
+
+    const organisers = await getApprovedORganisers();
+
+    return res.status(200).json({
+      success: true,
+      total: organisers.length,
+      organisers,
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+
+  }
+};
+
+// ================= GET Rejected ORGANISERS (ADMIN) =================
+
+export const fetchRejectedOrganiser = async (req, res) => {
+  try {
+
+    const organisers = await getRejectedOrganisers();
+
+    return res.status(200).json({
+      success: true,
+      total: organisers.length,
+      organisers,
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+
+  }
+};
+
 // ================= APPROVE ORGANISER (ADMIN) =================
 
 export const approveOrganiserByAdmin = async (req, res) => {
@@ -352,5 +411,42 @@ export const rejectOrganiserByAdmin = async (req, res) => {
       message: "Server Error",
     });
 
+  }
+};
+
+export const deleteOrganiserByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { message } = req.body;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "A message explaining the removal is required.",
+      });
+    }
+
+    const organiser = await findOrganiserById(id);
+
+    if (!organiser) {
+      return res.status(404).json({ success: false, message: "Organiser not found." });
+    }
+
+    // Notify before deleting — so we still have their email at hand
+    try {
+      await notifyOrganiserDeleted(organiser, message.trim());
+    } catch (notifyError) {
+      console.error("Failed to notify organiser of deletion:", notifyError);
+    }
+
+    await deleteOrganiser(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Organiser removed and notified.",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

@@ -3,7 +3,11 @@ import jwt from "jsonwebtoken";
 import otpGenerator from "otp-generator";
 
 import otpStore from "../otpStore.js";
-import { sendOTP ,notifyAdminNewOrganiser, notifyOrganiserDeleted} from "../utils/sendEmail.js";
+import {
+  sendOTP,
+  notifyAdminNewOrganiser,
+  notifyOrganiserDeleted,
+} from "../utils/sendEmail.js";
 
 import {
   createOrganiser,
@@ -15,6 +19,8 @@ import {
   approveOrganiser,
   rejectOrganiser,
   deleteOrganiser,
+  updateOrganiserProfile,
+  updateOrganiserBankDetails,
 } from "../models/organiserModel.js";
 
 import { isValidEmail, isStrongPassword } from "../utils/validators.js";
@@ -30,7 +36,7 @@ const generateToken = (organiser) => {
     process.env.JWT_SECRET,
     {
       expiresIn: "7d",
-    }
+    },
   );
 };
 
@@ -107,16 +113,13 @@ export const registerOrganiser = async (req, res) => {
       success: true,
       message: "OTP sent successfully.",
     });
-
   } catch (error) {
-
     console.error(error);
 
     return res.status(500).json({
       success: false,
       message: "Server Error",
     });
-
   }
 };
 
@@ -124,7 +127,6 @@ export const registerOrganiser = async (req, res) => {
 
 export const verifyOTP = async (req, res) => {
   try {
-
     const { email, otp } = req.body;
 
     const organiserData = otpStore[email];
@@ -152,17 +154,14 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(
-      organiserData.password,
-      10
-    );
+    const hashedPassword = await bcrypt.hash(organiserData.password, 10);
 
     const organiser = await createOrganiser(
       organiserData.full_name,
       organiserData.organisation_name,
       organiserData.email,
       organiserData.phone,
-      hashedPassword
+      hashedPassword,
     );
 
     delete otpStore[email];
@@ -180,21 +179,17 @@ export const verifyOTP = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message:
-        "Registration successful. Waiting for admin approval.",
+      message: "Registration successful. Waiting for admin approval.",
       token,
       organiser,
     });
-
   } catch (error) {
-
     console.error(error);
 
     return res.status(500).json({
       success: false,
       message: "Server Error",
     });
-
   }
 };
 
@@ -202,7 +197,6 @@ export const verifyOTP = async (req, res) => {
 
 export const loginOrganiser = async (req, res) => {
   try {
-
     const { email, password } = req.body;
 
     if (!isValidEmail(email)) {
@@ -235,10 +229,7 @@ export const loginOrganiser = async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(
-      password,
-      organiser.password
-    );
+    const isMatch = await bcrypt.compare(password, organiser.password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -257,16 +248,13 @@ export const loginOrganiser = async (req, res) => {
       token,
       organiser,
     });
-
   } catch (error) {
-
     console.error(error);
 
     return res.status(500).json({
       success: false,
       message: "Server Error",
     });
-
   }
 };
 
@@ -274,7 +262,6 @@ export const loginOrganiser = async (req, res) => {
 
 export const fetchPendingOrganisers = async (req, res) => {
   try {
-
     const organisers = await getPendingOrganisers();
 
     return res.status(200).json({
@@ -282,16 +269,13 @@ export const fetchPendingOrganisers = async (req, res) => {
       total: organisers.length,
       organisers,
     });
-
   } catch (error) {
-
     console.error(error);
 
     return res.status(500).json({
       success: false,
       message: "Server Error",
     });
-
   }
 };
 
@@ -299,7 +283,6 @@ export const fetchPendingOrganisers = async (req, res) => {
 
 export const fetchApprovedOrganisers = async (req, res) => {
   try {
-
     const organisers = await getApprovedORganisers();
 
     return res.status(200).json({
@@ -307,16 +290,13 @@ export const fetchApprovedOrganisers = async (req, res) => {
       total: organisers.length,
       organisers,
     });
-
   } catch (error) {
-
     console.error(error);
 
     return res.status(500).json({
       success: false,
       message: "Server Error",
     });
-
   }
 };
 
@@ -324,7 +304,6 @@ export const fetchApprovedOrganisers = async (req, res) => {
 
 export const fetchRejectedOrganiser = async (req, res) => {
   try {
-
     const organisers = await getRejectedOrganisers();
 
     return res.status(200).json({
@@ -332,16 +311,13 @@ export const fetchRejectedOrganiser = async (req, res) => {
       total: organisers.length,
       organisers,
     });
-
   } catch (error) {
-
     console.error(error);
 
     return res.status(500).json({
       success: false,
       message: "Server Error",
     });
-
   }
 };
 
@@ -349,7 +325,6 @@ export const fetchRejectedOrganiser = async (req, res) => {
 
 export const approveOrganiserByAdmin = async (req, res) => {
   try {
-
     const { id } = req.params;
 
     const organiser = await approveOrganiser(id);
@@ -366,16 +341,13 @@ export const approveOrganiserByAdmin = async (req, res) => {
       message: "Organiser approved successfully.",
       organiser,
     });
-
   } catch (error) {
-
     console.error(error);
 
     return res.status(500).json({
       success: false,
       message: "Server Error",
     });
-
   }
 };
 
@@ -383,7 +355,6 @@ export const approveOrganiserByAdmin = async (req, res) => {
 
 export const rejectOrganiserByAdmin = async (req, res) => {
   try {
-
     const { id } = req.params;
     const { reason } = req.body;
 
@@ -401,16 +372,13 @@ export const rejectOrganiserByAdmin = async (req, res) => {
       message: "Organiser rejected successfully.",
       organiser,
     });
-
   } catch (error) {
-
     console.error(error);
 
     return res.status(500).json({
       success: false,
       message: "Server Error",
     });
-
   }
 };
 
@@ -429,7 +397,9 @@ export const deleteOrganiserByAdmin = async (req, res) => {
     const organiser = await findOrganiserById(id);
 
     if (!organiser) {
-      return res.status(404).json({ success: false, message: "Organiser not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Organiser not found." });
     }
 
     // Notify before deleting — so we still have their email at hand
@@ -448,5 +418,70 @@ export const deleteOrganiserByAdmin = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const editOrganiserProfile = async (req, res) => {
+  try {
+    const organiser_id = req.user.id;
+    const { full_name, phone } = req.body;
+
+    const organiser = await updateOrganiserProfile(organiser_id, full_name, phone);
+
+    res.status(200).json({ success: true, message: "Profile updated.", organiser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const editOrganiserBankDetails = async (req, res) => {
+  try {
+    const organiser_id = req.user.id;
+    const { bank_account_number, bank_ifsc_code, bank_name, bank_branch } = req.body;
+
+    const organiser = await updateOrganiserBankDetails(
+      organiser_id, bank_account_number, bank_ifsc_code, bank_name, bank_branch
+    );
+
+    res.status(200).json({ success: true, message: "Bank details updated.", organiser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const organiserProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (String(req.user.id) !== String(id)) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const organiser = await findOrganiserById(id);
+
+    if (!organiser) {
+      return res.status(404).json({
+        success: false,
+        message: "Organiser not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      organiser,
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

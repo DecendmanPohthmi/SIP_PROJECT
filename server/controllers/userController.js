@@ -15,7 +15,7 @@ import { isValidEmail, isStrongPassword } from "../utils/validators.js";
 const generateToken = (user) => {
   return jwt.sign(
     {
-      id: user.id,
+      id: user.user_id,
       role: "attendee",
     },
     process.env.JWT_SECRET,

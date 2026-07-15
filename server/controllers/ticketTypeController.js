@@ -5,6 +5,7 @@ import {
   updateTicketType,
   deleteTicketType,
 } from "../models/ticketTypeModel.js";
+import { getEventById } from "../models/eventModel.js";
 
 // ================= CREATE TICKET TYPE =================
 
@@ -21,6 +22,22 @@ export const addTicketType = async (req, res) => {
       max_tickets_per_person,
       is_refundable,
     } = req.body;
+
+    const event = await getEventById(event_id);
+    if (!event) {
+      return res.status(404).json({ success: false, message: "Event not found." });
+    }
+
+    const existingTickets = await getTicketTypesByEvent(event_id);
+    const allocated = existingTickets.reduce((sum, t) => sum + t.quantity, 0);
+    const remaining = event.total_capacity - allocated;
+
+    if (Number(quantity) > remaining) {
+      return res.status(400).json({
+        success: false,
+        message: `Only ${remaining} seats remaining to allocate (event capacity: ${event.total_capacity}, already allocated: ${allocated}).`,
+      });
+    }
 
     const ticket = await createTicketType(
       event_id,
@@ -42,14 +59,8 @@ export const addTicketType = async (req, res) => {
     });
 
   } catch (error) {
-
     console.log(error);
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -57,23 +68,12 @@ export const addTicketType = async (req, res) => {
 
 export const getEventTicketTypes = async (req, res) => {
   try {
-
     const { event_id } = req.params;
-
     const tickets = await getTicketTypesByEvent(event_id);
 
-    res.json({
-      success: true,
-      tickets,
-    });
-
+    res.json({ success: true, tickets });
   } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -81,30 +81,16 @@ export const getEventTicketTypes = async (req, res) => {
 
 export const getTicket = async (req, res) => {
   try {
-
     const { ticket_type_id } = req.params;
-
     const ticket = await getTicketTypeById(ticket_type_id);
 
     if (!ticket) {
-      return res.status(404).json({
-        success: false,
-        message: "Ticket type not found.",
-      });
+      return res.status(404).json({ success: false, message: "Ticket type not found." });
     }
 
-    res.json({
-      success: true,
-      ticket,
-    });
-
+    res.json({ success: true, ticket });
   } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -112,7 +98,6 @@ export const getTicket = async (req, res) => {
 
 export const editTicketType = async (req, res) => {
   try {
-
     const { ticket_type_id } = req.params;
 
     const {
@@ -127,6 +112,31 @@ export const editTicketType = async (req, res) => {
       is_refundable,
       status,
     } = req.body;
+
+    const existingTicket = await getTicketTypeById(ticket_type_id);
+    if (!existingTicket) {
+      return res.status(404).json({ success: false, message: "Ticket type not found." });
+    }
+
+    const event = await getEventById(existingTicket.event_id);
+    if (!event) {
+      return res.status(404).json({ success: false, message: "Event not found." });
+    }
+
+    const allTickets = await getTicketTypesByEvent(existingTicket.event_id);
+    // Exclude this ticket's current quantity from the total, since we're replacing it
+    const allocatedExcludingThis = allTickets
+      .filter((t) => t.ticket_type_id !== Number(ticket_type_id))
+      .reduce((sum, t) => sum + t.quantity, 0);
+
+    const remaining = event.total_capacity - allocatedExcludingThis;
+
+    if (Number(quantity) > remaining) {
+      return res.status(400).json({
+        success: false,
+        message: `Only ${remaining} seats available for this ticket type (event capacity: ${event.total_capacity}).`,
+      });
+    }
 
     const ticket = await updateTicketType(
       ticket_type_id,
@@ -149,12 +159,7 @@ export const editTicketType = async (req, res) => {
     });
 
   } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -162,22 +167,11 @@ export const editTicketType = async (req, res) => {
 
 export const removeTicketType = async (req, res) => {
   try {
-
     const { ticket_type_id } = req.params;
-
     await deleteTicketType(ticket_type_id);
 
-    res.json({
-      success: true,
-      message: "Ticket type deleted successfully.",
-    });
-
+    res.json({ success: true, message: "Ticket type deleted successfully." });
   } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-
+    res.status(500).json({ success: false, message: error.message });
   }
 };

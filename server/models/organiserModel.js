@@ -171,3 +171,27 @@ export const deleteOrganiser = async (organiser_id) => {
 
     return result.rows[0];
 };
+
+export const updateOrganiserProfile = async (organiser_id, full_name, phone) => {
+  const result = await pool.query(
+    `UPDATE organisers
+     SET full_name=$1, phone=$2, updated_at=CURRENT_TIMESTAMP
+     WHERE organiser_id=$3
+     RETURNING organiser_id, full_name, organisation_name, email, phone`,
+    [full_name, phone, organiser_id]
+  );
+  return result.rows[0];
+};
+
+export const updateOrganiserBankDetails = async (
+  organiser_id, bank_account_number, bank_ifsc_code, bank_name, bank_branch
+) => {
+  const result = await pool.query(
+    `UPDATE organisers
+     SET bank_account_number=$1, bank_ifsc_code=$2, bank_name=$3, bank_branch=$4, updated_at=CURRENT_TIMESTAMP
+     WHERE organiser_id=$5
+     RETURNING organiser_id, bank_account_number, bank_ifsc_code, bank_name, bank_branch`,
+    [bank_account_number, bank_ifsc_code, bank_name, bank_branch, organiser_id]
+  );
+  return result.rows[0];
+};

@@ -1,7 +1,10 @@
 import express from "express";
 
 import {
+  editOrganiserBankDetails,
+  editOrganiserProfile,
     loginOrganiser,
+    organiserProfile,
     registerOrganiser,
     verifyOTP
 } from "../controllers/organiserController.js";
@@ -14,6 +17,7 @@ import {
   removeTicketType,
 } from "../controllers/ticketTypeController.js";
 import authMiddleware from "../middleware/auth.js";
+import requireRole from "../middleware/requireRole.js";
 
 const router = express.Router();
 
@@ -31,5 +35,8 @@ router.get("/ticket/:ticket_type_id", authMiddleware, getTicket);
 router.put("/ticket/:ticket_type_id", authMiddleware, editTicketType);
 
 router.delete("/ticket/:ticket_type_id", authMiddleware, removeTicketType);
+router.get("/me/:id", authMiddleware, requireRole("organiser"), organiserProfile);
+router.put("/profile", authMiddleware, editOrganiserProfile);
+router.put("/bank-details", authMiddleware, editOrganiserBankDetails);
 
 export default router;

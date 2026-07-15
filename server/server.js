@@ -6,6 +6,7 @@ import userRoutes from "./routes/userRoutes.js";
 import organiserRoutes from "./routes/organiserRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
+import bookingRoutes from "./routes/bookingRoutes.js";
 
 
 dotenv.config();
@@ -26,6 +27,8 @@ app.use("/api/user",userRoutes);
 app.use("/api/organiser", organiserRoutes);
 app.use("/api/admin",adminRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/bookings", bookingRoutes);
+
 
 // 404 handler — catches any route that doesn't match above
 app.use((req, res) => {

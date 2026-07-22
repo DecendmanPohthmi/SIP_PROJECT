@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.tsx";
+import { useAuth } from "../context/AuthContext";
 import {
   BsImage,
   BsCalendarEvent,
@@ -8,6 +8,8 @@ import {
   BsPeopleFill,
   BsCashStack,
 } from "react-icons/bs";
+
+const API = (import.meta as any).env?.VITE_API_URL || "http://localhost:4000";
 
 const CreateEvent = () => {
   const navigate = useNavigate();
@@ -39,7 +41,8 @@ const CreateEvent = () => {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setError("");
 
     if (
@@ -60,7 +63,6 @@ const CreateEvent = () => {
     try {
       setLoading(true);
 
-      // Field names below match addEvent's req.body destructuring exactly.
       const formData = new FormData();
       formData.append("title", title);
       formData.append("description", description);
@@ -72,15 +74,12 @@ const CreateEvent = () => {
       formData.append("end_time", endTime);
       formData.append("total_capacity", totalCapacity);
       formData.append("pricing_mode", pricingMode);
-      // "image" matches upload.single("image") in your Multer middleware.
       if (imageFile) formData.append("image", imageFile);
 
-      const res = await fetch("http://localhost:4000/api/events/create", {
+      const res = await fetch(`${API}/api/events/create`, {
         method: "POST",
         headers: {
           token: token || "",
-          // No Content-Type here — the browser sets the multipart boundary
-          // automatically. Setting it manually breaks Multer's parsing.
         },
         body: formData,
       });
@@ -101,19 +100,23 @@ const CreateEvent = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-8 px-6 pb-16">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800">Create Event</h1>
-        <p className="text-slate-500 mt-1">
-          Fill in the details below. Your event will be reviewed before going
-          live.
+    <div className="max-w-3xl mx-auto mt-4 sm:mt-8 px-4 sm:px-6 pb-16">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">
+          Create Event
+        </h1>
+        <p className="text-sm sm:text-base text-slate-500 mt-1">
+          Fill in the details below. Your event will be reviewed before going live.
         </p>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-8 space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white border border-slate-100 rounded-2xl shadow-sm p-4 sm:p-8 space-y-5 sm:space-y-6"
+      >
         {/* Image Upload + Preview */}
         <div>
-          <label className="flex items-center gap-2 font-semibold mb-2 text-slate-700">
+          <label className="flex items-center gap-2 font-semibold mb-2 text-slate-700 text-sm sm:text-base">
             <BsImage size={16} />
             Event Image (optional)
           </label>
@@ -122,14 +125,14 @@ const CreateEvent = () => {
             type="file"
             accept="image/jpeg,image/jpg,image/png,image/webp"
             onChange={handleImageChange}
-            className="w-full border border-gray-300 rounded-lg p-3 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-slate-100 file:text-slate-700 file:font-medium hover:file:bg-slate-200"
+            className="w-full text-sm sm:text-base border border-gray-300 rounded-lg p-2.5 sm:p-3 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-slate-100 file:text-slate-700 file:font-medium hover:file:bg-slate-200"
           />
           <p className="text-xs text-gray-400 mt-1">
             JPG, PNG, or WEBP. Max 5MB.
           </p>
 
           {imagePreview && (
-            <div className="mt-3 w-full h-48 rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+            <div className="mt-3 w-full h-40 sm:h-48 rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
               <img
                 src={imagePreview}
                 alt="Event preview"
@@ -141,7 +144,7 @@ const CreateEvent = () => {
 
         {/* Title */}
         <div>
-          <label className="block font-semibold mb-2 text-slate-700">
+          <label className="block font-semibold mb-2 text-slate-700 text-sm sm:text-base">
             Event Title
           </label>
           <input
@@ -149,13 +152,13 @@ const CreateEvent = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Tech Conference 2026"
-            className="w-full border border-gray-300 rounded-lg p-3"
+            className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base focus:outline-none focus:border-slate-800"
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="block font-semibold mb-2 text-slate-700">
+          <label className="block font-semibold mb-2 text-slate-700 text-sm sm:text-base">
             Description
           </label>
           <textarea
@@ -163,19 +166,19 @@ const CreateEvent = () => {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Tell attendees what this event is about..."
             rows={4}
-            className="w-full border border-gray-300 rounded-lg p-3 resize-none"
+            className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base resize-none focus:outline-none focus:border-slate-800"
           />
         </div>
 
         {/* Category */}
         <div>
-          <label className="block font-semibold mb-2 text-slate-700">
+          <label className="block font-semibold mb-2 text-slate-700 text-sm sm:text-base">
             Category
           </label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-3 bg-white"
+            className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base bg-white focus:outline-none focus:border-slate-800"
           >
             <option value="">Select a category</option>
             <option value="Music">Music</option>
@@ -220,7 +223,7 @@ const CreateEvent = () => {
         {/* Venue + City */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="flex items-center gap-2 font-semibold mb-2 text-slate-700">
+            <label className="flex items-center gap-2 font-semibold mb-2 text-slate-700 text-sm sm:text-base">
               <BsGeoAlt size={16} />
               Venue
             </label>
@@ -229,12 +232,12 @@ const CreateEvent = () => {
               value={venue}
               onChange={(e) => setVenue(e.target.value)}
               placeholder="e.g. Convention Hall"
-              className="w-full border border-gray-300 rounded-lg p-3"
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base focus:outline-none focus:border-slate-800"
             />
           </div>
 
           <div>
-            <label className="block font-semibold mb-2 text-slate-700">
+            <label className="block font-semibold mb-2 text-slate-700 text-sm sm:text-base">
               City
             </label>
             <input
@@ -242,7 +245,7 @@ const CreateEvent = () => {
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder="e.g. Shillong"
-              className="w-full border border-gray-300 rounded-lg p-3"
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base focus:outline-none focus:border-slate-800"
             />
           </div>
         </div>
@@ -250,7 +253,7 @@ const CreateEvent = () => {
         {/* Date + Times */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="flex items-center gap-2 font-semibold mb-2 text-slate-700">
+            <label className="flex items-center gap-2 font-semibold mb-2 text-slate-700 text-sm sm:text-base">
               <BsCalendarEvent size={16} />
               Date
             </label>
@@ -258,31 +261,31 @@ const CreateEvent = () => {
               type="date"
               value={eventDate}
               onChange={(e) => setEventDate(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-3"
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base focus:outline-none focus:border-slate-800"
             />
           </div>
 
           <div>
-            <label className="block font-semibold mb-2 text-slate-700">
+            <label className="block font-semibold mb-2 text-slate-700 text-sm sm:text-base">
               Start Time
             </label>
             <input
               type="time"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-3"
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base focus:outline-none focus:border-slate-800"
             />
           </div>
 
           <div>
-            <label className="block font-semibold mb-2 text-slate-700">
+            <label className="block font-semibold mb-2 text-slate-700 text-sm sm:text-base">
               End Time
             </label>
             <input
               type="time"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-3"
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base focus:outline-none focus:border-slate-800"
             />
           </div>
         </div>
@@ -290,7 +293,7 @@ const CreateEvent = () => {
         {/* Capacity + Pricing */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="flex items-center gap-2 font-semibold mb-2 text-slate-700">
+            <label className="flex items-center gap-2 font-semibold mb-2 text-slate-700 text-sm sm:text-base">
               <BsPeopleFill size={16} />
               Total Capacity
             </label>
@@ -300,12 +303,12 @@ const CreateEvent = () => {
               value={totalCapacity}
               onChange={(e) => setTotalCapacity(e.target.value)}
               placeholder="e.g. 200"
-              className="w-full border border-gray-300 rounded-lg p-3"
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base focus:outline-none focus:border-slate-800"
             />
           </div>
 
           <div>
-            <label className="flex items-center gap-2 font-semibold mb-2 text-slate-700">
+            <label className="flex items-center gap-2 font-semibold mb-2 text-slate-700 text-sm sm:text-base">
               <BsCashStack size={16} />
               Pricing
             </label>
@@ -313,7 +316,7 @@ const CreateEvent = () => {
               <button
                 type="button"
                 onClick={() => setPricingMode("free")}
-                className={`flex-1 py-3 rounded-lg border font-medium transition-colors ${
+                className={`flex-1 py-3 rounded-lg border font-medium text-sm sm:text-base transition-colors ${
                   pricingMode === "free"
                     ? "bg-black text-white border-black"
                     : "border-gray-300 text-gray-700"
@@ -324,7 +327,7 @@ const CreateEvent = () => {
               <button
                 type="button"
                 onClick={() => setPricingMode("paid")}
-                className={`flex-1 py-3 rounded-lg border font-medium transition-colors ${
+                className={`flex-1 py-3 rounded-lg border font-medium text-sm sm:text-base transition-colors ${
                   pricingMode === "paid"
                     ? "bg-black text-white border-black"
                     : "border-gray-300 text-gray-700"
@@ -344,13 +347,13 @@ const CreateEvent = () => {
         )}
 
         <button
-          onClick={handleSubmit}
+          type="submit"
           disabled={loading}
-          className="w-full bg-black text-white py-3.5 rounded-lg font-semibold hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full bg-black text-white py-3.5 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? "Uploading..." : "Submit Event for Approval"}
         </button>
-      </div>
+      </form>
     </div>
   );
 };

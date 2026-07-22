@@ -40,10 +40,10 @@ const Login = () => {
         throw new Error(data.message || "Login failed");
       }
 
-      const storedRole = role === "attendee" ? "user" : "organiser";
+      const storedRole = role === "attendee" ? "attendee" : "organiser";
       login(data.token, storedRole);
 
-      navigate(storedRole === "user" ? "/" : "/");
+      navigate(storedRole === "attendee" ? "/" : "/");
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {

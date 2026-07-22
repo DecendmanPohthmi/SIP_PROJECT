@@ -1,12 +1,18 @@
 import React, { useState, useRef } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 
+// Declare API globally for the component
+const API = (import.meta as any).env?.VITE_API_URL || "http://localhost:4000";
+
 const OtpValidator = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   // Passed from Register.tsx via navigate("/verify-otp", { state: { email, role } })
-  const state = location.state as { email?: string; role?: "attendee" | "organizer" } | null;
+  const state = location.state as {
+    email?: string;
+    role?: "attendee" | "organizer";
+  } | null;
   const email = state?.email || "";
   const role = state?.role || "attendee";
 
@@ -29,7 +35,10 @@ const OtpValidator = () => {
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -52,8 +61,8 @@ const OtpValidator = () => {
 
     const endpoint =
       role === "attendee"
-        ? "http://localhost:4000/api/user/verify"
-        : "http://localhost:4000/api/organiser/verify";
+        ? `${API}/api/user/verify`
+        : `${API}/api/organiser/verify`;
 
     try {
       setLoading(true);
@@ -91,8 +100,8 @@ const OtpValidator = () => {
 
     const endpoint =
       role === "attendee"
-        ? "http://localhost:4000/api/user/register"
-        : "http://localhost:4000/api/organiser/register";
+        ? `${API}/api/user/register`
+        : `${API}/api/organiser/register`;
 
     try {
       setResending(true);
@@ -121,14 +130,15 @@ const OtpValidator = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
-
         <h1 className="text-3xl font-bold text-center mb-2">
           Verify Your Email
         </h1>
 
         <p className="text-center text-gray-500 mb-8">
           Enter the 6-digit code sent to{" "}
-          <span className="font-medium text-gray-700">{email || "your email"}</span>
+          <span className="font-medium text-gray-700">
+            {email || "your email"}
+          </span>
         </p>
 
         {/* OTP Boxes */}
@@ -136,7 +146,9 @@ const OtpValidator = () => {
           {otp.map((digit, index) => (
             <input
               key={index}
-              ref={(el) => { inputRefs.current[index] = el; }}
+              ref={(el) => {
+                inputRefs.current[index] = el;
+              }}
               type="text"
               inputMode="numeric"
               maxLength={1}
@@ -173,11 +185,13 @@ const OtpValidator = () => {
         </p>
 
         <p className="text-center mt-4">
-          <Link to="/register" className="text-gray-500 text-sm hover:underline">
+          <Link
+            to="/register"
+            className="text-gray-500 text-sm hover:underline"
+          >
             Back to Register
           </Link>
         </p>
-
       </div>
     </div>
   );

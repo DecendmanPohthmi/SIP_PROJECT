@@ -28,7 +28,7 @@ type EventItem = {
   available_capacity: number;
 };
 
-type Tab = "approved" | "live" | "pending" | "completed" | "rejected";
+type Tab = "approved" | "live" | "pending" | "completed" | "rejected" | "cancelled";
 
 const OrganiserDashboard = () => {
   const { token } = useAuth();
@@ -46,6 +46,7 @@ const OrganiserDashboard = () => {
     { key: "pending", label: "Pending Approval", icon: <BsClockHistory size={16} />, iconColor: "text-slate-500" },
     { key: "completed", label: "Completed", icon: <BsCheckCircleFill size={16} />, iconColor: "text-indigo-500" },
     { key: "rejected", label: "Rejected", icon: <BsXCircleFill size={16} />, iconColor: "text-red-500" },
+    { key: "cancelled", label: "Cancelled", icon: <BsSlashCircle size={16} />, iconColor: "text-red-500" },
   ];
 
   const fetchAll = async () => {
@@ -129,6 +130,25 @@ const OrganiserDashboard = () => {
       refreshAll();
     } catch (err: any) {
       alert(err.message || "Could not cancel event.");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleComplete = async (eventId: number) => {
+    if (!confirm("Mark this event as completed? This cannot be undone.")) return;
+
+    try {
+      setActionLoadingId(eventId);
+      const res = await fetch(`http://localhost:4000/api/events/complete/${eventId}`, {
+        method: "PUT",
+        headers: { token: token || "" },
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      refreshAll();
+    } catch (err: any) {
+      alert(err.message || "Could not mark event as completed.");
     } finally {
       setActionLoadingId(null);
     }
@@ -293,14 +313,24 @@ const OrganiserDashboard = () => {
                   )}
 
                   {event.status === "live" && (
-                    <button
-                      onClick={() => handleCancel(event.event_id)}
-                      disabled={actionLoadingId === event.event_id}
-                      className="flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-100 disabled:opacity-50"
-                    >
-                      <BsSlashCircle size={14} />
-                      {actionLoadingId === event.event_id ? "..." : "Cancel"}
-                    </button>
+                    <>
+                      <button
+                        onClick={() => handleComplete(event.event_id)}
+                        disabled={actionLoadingId === event.event_id}
+                        className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-indigo-100 disabled:opacity-50"
+                      >
+                        <BsCheckCircleFill size={14} />
+                        {actionLoadingId === event.event_id ? "..." : "Mark Completed"}
+                      </button>
+                      <button
+                        onClick={() => handleCancel(event.event_id)}
+                        disabled={actionLoadingId === event.event_id}
+                        className="flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-100 disabled:opacity-50"
+                      >
+                        <BsSlashCircle size={14} />
+                        {actionLoadingId === event.event_id ? "..." : "Cancel"}
+                      </button>
+                    </>
                   )}
 
                   <Link

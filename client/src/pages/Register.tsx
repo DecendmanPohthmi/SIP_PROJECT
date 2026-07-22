@@ -52,7 +52,7 @@ const Register = () => {
         throw new Error(data.message || "Registration failed");
       }
 
-      const storedRole = role === "attendee" ? "user" : "organiser";
+      const storedRole = role === "attendee" ? "attendee" : "organiser";
       navigate("/verify", { state: { email, role: storedRole } });
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");

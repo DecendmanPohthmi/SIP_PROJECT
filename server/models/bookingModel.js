@@ -145,6 +145,7 @@ export const getBookingsByUser = async (user_id) => {
         e.title,
         e.event_date,
         e.city,
+        e.status AS event_status,
         tt.ticket_name
      FROM bookings b
      JOIN events e ON b.event_id = e.event_id

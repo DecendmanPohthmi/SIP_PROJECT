@@ -20,7 +20,7 @@ import {
   removeEvent,
   fetchLivedEvents,
 } from "../controllers/eventController.js";
-import { getEventTicketTypes } from "../controllers/ticketTypeController.js";
+import { getEventTicketTypes, getTicket } from "../controllers/ticketTypeController.js";
 
 const router = express.Router();
 
@@ -36,6 +36,7 @@ router.delete("/delete/:id", authMiddleware, removeEvent);
 // ================= PUBLIC =================
 router.get("/", fetchAllEvents);
 router.get("/approved", fetchLivedEvents); // live events, attendee-facing
+router.get("/ticket/:ticket_type_id", authMiddleware, getTicket);
 
 // ================= ADMIN (must be before /:id) =================
 router.get("/status/:status", authMiddleware, requireRole("admin"), fetchEventsByStatus);
@@ -44,6 +45,7 @@ router.put("/approve/:id", authMiddleware, requireRole("admin"), approveEventByA
 router.put("/reject/:id", authMiddleware, requireRole("admin"), rejectEventByAdmin);
 router.put("/complete/:id", authMiddleware, requireRole("organiser"), completeEventByAdmin);
 router.get("/:event_id/tickets", getEventTicketTypes);
+
 
 // ================= WILDCARD — MUST STAY LAST =================
 router.get("/:id", fetchEvent);

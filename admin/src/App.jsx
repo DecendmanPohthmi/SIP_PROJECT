@@ -7,7 +7,7 @@ import AdminLogin from "./pages/AdminLoginPage";
 import AdminLayout from "./components/sidebar";
 import ProtectedRoute from "./context/Protectedroute";
 import AdminNavbar from "./components/navbar";
-import AdminProfile from "./pages/adminProfile";
+import AdminProfile from "./pages/AdminProfile";
 import AdminOrganisers from "./pages/AdminOrganiser";
 import AdminEvents from "./pages/AdminEvent";
 import AdminUsers from "./pages/AdminUser";

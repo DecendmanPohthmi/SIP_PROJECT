@@ -115,7 +115,7 @@ export const markRefundProcessed = async (client, refund_id, razorpay_refund_id)
   const db = client || pool;
   await db.query(
     `UPDATE refunds
-     SET status = 'processed', razorpay_refund_id = $1, processed_at = CURRENT_TIMESTAMP
+     SET status = 'completed', razorpay_refund_id = $1, processed_at = CURRENT_TIMESTAMP
      WHERE refund_id = $2`,
     [razorpay_refund_id, refund_id]
   );
